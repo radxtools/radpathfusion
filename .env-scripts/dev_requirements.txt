@@ -1,0 +1,7 @@
+autopep8
+mypy
+jupyterlab
+pylint
+ipywidgets
+opencv-contrib-python
+holoviews[recommended]
