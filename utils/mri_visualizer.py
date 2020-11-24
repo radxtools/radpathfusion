@@ -6,6 +6,7 @@ from .helpers import scale_image_dim
 import param
 import cv2
 import pydicom
+from .primitives import Image
 
 
 class MriVisualizer(param.Parameterized):
@@ -15,14 +16,10 @@ class MriVisualizer(param.Parameterized):
     SCALE_MIN = 1
     SCALE_MAX = 10
 
-    interpolation_map = {
-        "INTER_LINEAR": cv2.INTER_LINEAR,
-        "INTER_CUBIC": cv2.INTER_CUBIC,
-        "INTER_AREA": cv2.INTER_AREA
-    }
-
     def __init__(self, mri_path: Path):
         p = Path(mri_path)
+
+        # slice location better for sorting
         self.dcms = sorted([dcm for dcm in p.iterdir()])
 
         initial_scale = 1
@@ -36,14 +33,13 @@ class MriVisualizer(param.Parameterized):
             name='slice', value=1, start=1, end=len(self.dcms))
         self.interpolation = pnw.Select(name='interpolation', options=[
                                         'INTER_AREA', 'INTER_CUBIC', 'INTER_LINEAR'], value='INTER_CUBIC')
-
-        w, h = self.fixed_image.shape
+        w, h = 0, 0
 
         self.aspect_wig = pn.widgets.StaticText(
             name='aspect ratio', value=(w, h))
 
     def load_mri(self, i, scale, interpolation):
-        dst = self.fixed_image  # this should be a open cv image
+        dst = self.fixed_image()  # this should be a open cv image
         height, width = dst.shape[0], dst.shape[1]
         self.aspect_wig.value = dst.shape
         return (hv.Image(dst, bounds=(0, 0, width, height))
@@ -52,19 +48,16 @@ class MriVisualizer(param.Parameterized):
                         cmap='gray'))
 
     @property
-    def fixed_image(self):
+    def fixed_image(self) -> Image:
         path = self.dcms[self.index_wig.value]
         dataset = pydicom.dcmread(path)
-        src = dataset.pixel_array
-        interpolation_ = MriVisualizer.interpolation_map.get(
-            self.interpolation.value, 'INTER_LINEAR')
-        return scale_image_dim(src, self.scale_wig.value, interpolation_)
+        img = dataset.pixel_array
+        return Image(img, scale=self.scale_wig.value, interpolation=self.interpolation.value)
 
     def panel(self):
         scaling = pn.Column(self.scale_wig, self.aspect_wig)
         widgets = pn.Column(scaling, self.index_wig, self.interpolation)
         image_ = pn.Column()
-        self.image_ = image_
         image_.append(pn.depends(self.index_wig, self.scale_wig,
                                  self.interpolation)(self.load_mri))
         image = pn.Row(image_, widgets)
