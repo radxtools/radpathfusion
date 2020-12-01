@@ -58,7 +58,6 @@ class TpsAlgoVisualizer:
         moved = tps.warp()
 
         img = moved.change_landmarks_reference(Origin.BOTTOM_LEFT)
-        print(img)
 
         pathology = img()
         h, w = pathology.shape[0:2]
@@ -103,6 +102,8 @@ class TpsAlgoVisualizer:
                                                                   size=POINT_SIZE,
                                                                   # alpha=.25,
                                                                   tools=['hover'])
+        ).opts(
+            title="Mri and Pathology with affine landmarks"
         )
 
     def mri_with_affine_and_tps_overlay(self):
@@ -130,7 +131,7 @@ class TpsAlgoVisualizer:
 
         return (
             hv.Image(mri, bounds=(0, 0, fw, fh)).opts(cmap='gray')
-            * hv.RGB(pathology, bounds=(0, 0, pw, ph)).opts(alpha=.5)
+            * hv.RGB(tps, bounds=(0, 0, pw, ph)).opts(alpha=.5)
             * hv.Points(fixed_points, label="mri points").opts(color='red',
                                                                size=POINT_SIZE,
                                                                alpha=.25,
@@ -143,6 +144,8 @@ class TpsAlgoVisualizer:
                                                              size=POINT_SIZE,
                                                              alpha=.25,
                                                              tools=['hover'])
+        ).opts(
+            title="Mri and Pathology with affine and tps landmarks"
         )
 
     def mri_with_tps_overlay(self):
@@ -171,6 +174,8 @@ class TpsAlgoVisualizer:
                                                                size=POINT_SIZE,
                                                                #    alpha=.25,
                                                                tools=['hover'])
+        ).opts(
+            title="Mri and Pathology with tps landmarks"
         )
 
     def panel(self):
@@ -179,12 +184,14 @@ class TpsAlgoVisualizer:
         tps = self.pathology_with_tps_points()
         overlay_affine = self.mri_with_affine_overlay()
         overlay_tps = self.mri_with_tps_overlay()
+        overlay_affine_tps = self.mri_with_affine_and_tps_overlay()
         return (
             (mri
              + affined
              + tps
              + overlay_affine
              + overlay_tps
+             + overlay_affine_tps
              ).opts(
                 width=VISUAL_WIDTH,
                 height=VISUAL_HEIGHT
