@@ -35,8 +35,8 @@ class PathologyVisualizer(param.Parameterized):
                                        start=-180,
                                        end=180)
 
-        self.flip_x_axis = pnw.Toggle(name="flip horizontally", width=100)
-        self.flip_y_axis = pnw.Toggle(name="flip vertically", width=100)
+        self.flip_y_axis = pnw.Toggle(name="flip horizontally", width=100)
+        self.flip_x_axis = pnw.Toggle(name="flip vertically", width=100)
 
         self.interpolation = pnw.Select(name='interpolation', options=[
                                         'INTER_AREA', 'INTER_CUBIC', 'INTER_LINEAR'], value='INTER_LINEAR')
