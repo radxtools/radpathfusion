@@ -4,6 +4,8 @@ from pathlib import Path
 from .helpers import rotate_bound, scale_image_dim
 from enum import Enum, auto
 from typing import Union, List
+import uuid
+import json
 
 
 class Point:
@@ -52,7 +54,7 @@ class Frame:
     def to_dict(self):
         return {
             "origin": str(self.origin),
-            "points": self.points
+            "points": [(p.x, p.y) for p in self.points]
         }
 
 
@@ -200,16 +202,45 @@ class Image:
         _angle = angle if angle else self.angle
         _interpolations = interpolation if interpolation else self.interpolation
         _landmark = landmarks if landmarks else self.landmarks
-        return Image(self.__image, angle=_angle, scale=_scale, interpolation=_interpolations, landmarks=_landmark, flip_x=flip_x, flip_y=flip_y)
+        _flip_x = flip_x if flip_x else self.flip_x
+        _flip_y = flip_y if flip_y else self.flip_y
+        return Image(self.__image,
+                     angle=_angle,
+                     scale=_scale,
+                     interpolation=_interpolations,
+                     landmarks=_landmark,
+                     flip_x=_flip_x,
+                     flip_y=_flip_y
+                     )
 
-    def save(self, path: Path):
-        cv2.imwrite(path, self.img)
+    def save(self, dir_path: Path, name: str = None, data=True):
+        _id = uuid.uuid4()
+        if dir_path.is_file():
+            raise "dir_path needs to be a directory"
+        img = self()
+        ext = ".tif" if len(img.shape) > 2 else ".jpg"
+        img_path = dir_path / f"{name}.{_id}.{ext}"
+
+        cv2.imwrite(str(img_path), img)
+        if data:
+            data_path = dir_path / f"{name}.{_id}.json"
+            data = {
+                "angle": self.angle,
+                "scale": self.scale,
+                "interpolation": self.interpolation,
+                "flip_x": self.flip_x,
+                "flip_y": self.flip_y,
+                "landmarks": self.landmarks.to_dict()
+            }
+            json.dump(data, data_path.open('w'))
 
     def copy_attributes(self, other: 'Image'):
         return self.update(
             scale=other.scale,
             angle=other.angle,
             interpolation=other.interpolation,
+            flip_x=other.flip_x,
+            flip_y=other.flip_y,
             landmarks=other.landmarks
         )
 
@@ -219,4 +250,4 @@ class Image:
         return Image(img)
 
     def __repr__(self):
-        return f"Image(scale={self.scale},angle={self.angle},interpolation={self.interpolation},landmarks={self.landmarks})"
+        return f"Image(scale={self.scale},angle={self.angle},interpolation={self.interpolation},flip_x={self.flip_x},flip_y={self.flip_y},landmarks={self.landmarks})"
