@@ -95,21 +95,35 @@ class Image:
                  angle: float = ANGLE_DEFAULT,
                  scale: float = SCALE_DEFAULT,
                  interpolation: str = "INTER_LINEAR",
+                 flip_x: bool = False,
+                 flip_y: bool = False,
                  landmarks: Frame = None):
         self.__image = img
         self.__angle = angle
         self.__scale = scale
         self.__interpolation = interpolation
         self.__landmarks = landmarks
+        self.__flip_x = flip_x
+        self.__flip_y = flip_y
 
     def __call__(self):
         img = self.__image
+
         if self.scale != SCALE_DEFAULT:
             cv2_interpolation = INTERPOLATION_STR_MAP_TO_CV2[self.interpolation]
             img = scale_image_dim(
                 img, self.scale, cv2_interpolation)
+
         if self.angle != ANGLE_DEFAULT:
             img = rotate_bound(img, self.angle)
+
+        if self.flip_x and self.flip_y:
+            img = cv2.flip(img, -1)
+        elif self.flip_x and not self.flip_y:
+            img = cv2.flip(img, 0)
+        elif not self.flip_x and self.flip_y:
+            img = cv2.flip(img, 1)
+
         return img
 
     def normalize(self):
@@ -141,6 +155,14 @@ class Image:
     def landmarks(self) -> Frame:
         return self.__landmarks
 
+    @property
+    def flip_x(self) -> bool:
+        return self.__flip_x
+
+    @property
+    def flip_y(self) -> bool:
+        return self.__flip_y
+
     def change_landmarks_reference(self, to_origin: Origin) -> 'Image':
         if to_origin.value == self.landmarks.origin.value:
             return self.update()
@@ -167,12 +189,18 @@ class Image:
                 landmarks=f
             )
 
-    def update(self, scale: float = None, angle: float = None, interpolation: str = None, landmarks: Frame = None):
+    def update(self,
+               scale: float = None,
+               angle: float = None,
+               interpolation: str = None,
+               flip_x: bool = False,
+               flip_y: bool = False,
+               landmarks: Frame = None):
         _scale = scale if scale else self.scale
         _angle = angle if angle else self.angle
         _interpolations = interpolation if interpolation else self.interpolation
         _landmark = landmarks if landmarks else self.landmarks
-        return Image(self.__image, angle=_angle, scale=_scale, interpolation=_interpolations, landmarks=_landmark)
+        return Image(self.__image, angle=_angle, scale=_scale, interpolation=_interpolations, landmarks=_landmark, flip_x=flip_x, flip_y=flip_y)
 
     def save(self, path: Path):
         cv2.imwrite(path, self.img)

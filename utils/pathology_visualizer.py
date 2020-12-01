@@ -35,10 +35,19 @@ class PathologyVisualizer(param.Parameterized):
                                        start=-180,
                                        end=180)
 
+        self.flip_x_axis = pnw.Toggle(name="flip horizontally", width=100)
+        self.flip_y_axis = pnw.Toggle(name="flip vertically", width=100)
+
         self.interpolation = pnw.Select(name='interpolation', options=[
                                         'INTER_AREA', 'INTER_CUBIC', 'INTER_LINEAR'], value='INTER_LINEAR')
 
-    def load_pathology(self, scale=.5, interpolation=cv2.INTER_LINEAR, angle=0):
+    def load_pathology(self,
+                       scale=.5,
+                       interpolation=cv2.INTER_LINEAR,
+                       angle=0.,
+                       flip_x=False,
+                       flip_y=False
+                       ):
         img = self.moving_image()
         self.aspect_wig.value = img.shape[0:2]
         h, w = img.shape[0], img.shape[1]
@@ -51,22 +60,19 @@ class PathologyVisualizer(param.Parameterized):
         return self.pathology_img_source.update(
             scale=self.scale_wig.value,
             angle=self.angle_wig.value,
-            interpolation=self.interpolation.value
+            interpolation=self.interpolation.value,
+            flip_x=self.flip_x_axis.value,
+            flip_y=self.flip_y_axis.value
         )
 
-    # def transform_annotation_image(self, annotated_img):
-    #     interpolation_ = cv2.INTER_AREA
-    #     img = scale_image_dim(
-    #         annotated_img, self.scale_wig.value, interpolation_)
-    #     return rotate_bound(img, self.angle_wig.value)
-
     def panel(self):
-        transforms = pn.Column(self.scale_wig, self.aspect_wig, self.angle_wig)
+        flips = pn.Row(self.flip_x_axis, self.flip_y_axis)
+        transforms = pn.Column(
+            self.scale_wig, self.aspect_wig, self.angle_wig, flips)
         widgets = pn.Column(transforms, self.interpolation)
         image_ = pn.Column()
-        self.image_ = image_
         image_.append(pn.depends(self.scale_wig, self.interpolation,
-                                 self.angle_wig)(self.load_pathology))
+                                 self.angle_wig, self.flip_x_axis, self.flip_y_axis)(self.load_pathology))
         image = pn.Row(image_, widgets)
         return image
 
