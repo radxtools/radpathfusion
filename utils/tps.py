@@ -80,14 +80,16 @@ class TpsAlgorithm:
 
         # todo: this is for the image
         tpst: cv2.ThinPlateSplineShapeTransformer = cv2.createThinPlateSplineShapeTransformer()
-        tpst.estimateTransformation(transformingShape=fixed_landmarks,  targetShape=new_moving_landmarks, matches)
+        tpst.estimateTransformation(
+            transformingShape=fixed_landmarks,  targetShape=new_moving_landmarks, matches=matches)
         img = affined_image()
         wi = np.ones_like(img)
         warp_img = tpst.warpImage(img, wi)
 
         # todo: this is for the points (transforming shape and targe shape are reversed from the image)
         tpst: cv2.ThinPlateSplineShapeTransformer = cv2.createThinPlateSplineShapeTransformer()
-        tpst.estimateTransformation(transformingShape=new_moving_landmarks, targetShape=fixed_landmarks, matches)
+        tpst.estimateTransformation(
+            transformingShape=new_moving_landmarks, targetShape=fixed_landmarks, matches=matches)
 
         _, tps_landmarks = tpst.applyTransformation(new_moving_landmarks)
 
