@@ -247,6 +247,9 @@ class Image:
     @staticmethod
     def load(path: Union[str, Path]):
         img = cv2.imread(str(path))
+        bands = len(img.shape)
+        if(bands == 3):
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         return Image(img)
 
     def __repr__(self):
