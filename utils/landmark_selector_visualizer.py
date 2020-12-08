@@ -30,8 +30,13 @@ class LandmarkSelectorVisualizer():
         self.fixed_stream = None
         self.moving_stream = None
 
-    def _landmark_moving_wig(self, arr):
-        points_source = hv.Points([])
+    def _landmark_moving_wig(self, img: Image):
+        arr = img()
+        cache = []
+        if img.landmarks:
+            cache = [(p.x, p.y) for p in img.change_landmarks_reference(
+                Origin.BOTTOM_LEFT).landmarks.points]
+        points_source = hv.Points(cache)
 
         points_source_stream = streams.PointDraw(data=points_source.columns(),
                                                  num_objects=10,
@@ -57,8 +62,14 @@ class LandmarkSelectorVisualizer():
 
         return wig
 
-    def _landmark_fixed_wig(self, arr):
-        points_source = hv.Points([])
+    def _landmark_fixed_wig(self, img: Image):
+        arr = img()
+        cache = []
+        if img.landmarks:
+            cache = [(p.x, p.y) for p in img.change_landmarks_reference(
+                Origin.BOTTOM_LEFT).landmarks.points]
+        points_source = hv.Points(cache)
+
         points_source_stream = streams.PointDraw(data=points_source.columns(),
                                                  num_objects=10,
                                                  source=points_source,
@@ -134,8 +145,8 @@ class LandmarkSelectorVisualizer():
         return df
 
     def panel(self):
-        fixed = self._landmark_fixed_wig(self.fixed_img())
-        moving = self._landmark_moving_wig(self.moving_img())
+        fixed = self._landmark_fixed_wig(self.fixed_img)
+        moving = self._landmark_moving_wig(self.moving_img)
         layout = (fixed + moving).opts(merge_tools=False, shared_axes=False)
         layout.cols(2)
         return layout

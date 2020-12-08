@@ -6,6 +6,9 @@ from enum import Enum, auto
 from typing import Union, List
 import uuid
 import json
+import logging
+
+logger = logging.getLogger("rad.primitives")
 
 
 class Point:
@@ -56,6 +59,13 @@ class Frame:
             "origin": str(self.origin),
             "points": [(p.x, p.y) for p in self.points]
         }
+
+    @staticmethod
+    def from_dict(values):
+        f = Frame()
+        f.origin = Origin.BOTTOM_LEFT if values["origin"] == "Origin.BOTTOM_LEFT" else Origin.TOP_LEFT
+        f.points = [Point(x, y) for x, y in values["points"]]
+        return f
 
 
 def numpy_to_frame(arr: np.ndarray, origin: Origin) -> Frame:
@@ -218,12 +228,16 @@ class Image:
         if dir_path.is_file():
             raise "dir_path needs to be a directory"
         img = self()
-        ext = ".tif" if len(img.shape) > 2 else ".jpg"
-        img_path = dir_path / f"{name}.{_id}.{ext}"
+        ext = "tif" if len(img.shape) > 2 else "jpg"
+        # img_path = dir_path / f"{name}.{_id}.{ext}"
+        img_path = dir_path / f"{name}.{ext}"
 
         cv2.imwrite(str(img_path), img)
+        logger.info(f"Saving image to {img_path}")
         if data:
-            data_path = dir_path / f"{name}.{_id}.json"
+            # data_path = dir_path / f"{name}.{_id}.json"
+            data_path = dir_path / f"{name}.json"
+
             data = {
                 "angle": self.angle,
                 "scale": self.scale,
@@ -233,6 +247,7 @@ class Image:
                 "landmarks": self.landmarks.to_dict()
             }
             json.dump(data, data_path.open('w'))
+            logger.info(f"Saving data to {data_path}")
 
     def copy_attributes(self, other: 'Image'):
         return self.update(
@@ -244,7 +259,39 @@ class Image:
             landmarks=other.landmarks
         )
 
-    @staticmethod
+    def load_data(self, from_path: Union[str, Path]) -> 'Image':
+        """
+        Loads data from the file system for attributes that can be found. Always gives a new copy.
+        Returns: Image
+        Assumption: We are loading in the config for the current loaded object. This is someting the end user keeps track off. Do not cross reference configs as this could give different values.
+        """
+        path = Path(from_path)
+        if path.exists() and path.is_file():
+            logger.info(
+                f"Found file at '{path}', will load data.")
+            data = json.loads(path.read_text())
+
+            _angle = data.get("angle", self.angle)
+            _scale = data.get("scale", self.scale)
+            _interpolation = data.get("interpolation", self.interpolation)
+            _flip_x = data.get("flip_x", self.flip_x)
+            _flip_y = data.get("flip_y", self.flip_y)
+            _landmarks = data.get("landmarks", self.landmarks)
+            _landmarks = Frame.from_dict(_landmarks)
+            return self.update(
+                angle=_angle,
+                scale=_scale,
+                interpolation=_interpolation,
+                flip_x=_flip_x,
+                flip_y=_flip_y,
+                landmarks=_landmarks
+            )
+        else:
+            logger.info(
+                f"Did not find file at '{path}', will not load any data.")
+            return self.update()
+
+    @ staticmethod
     def load(path: Union[str, Path]):
         img = cv2.imread(str(path))
         bands = len(img.shape)
