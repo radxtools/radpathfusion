@@ -10,6 +10,11 @@ from .primitives import Image
 VISUAL_WIDTH = 600
 VISUAL_HEIGHT = 600
 
+DEFAULT_PIXEL_WIDTH = 2000
+DEFAULT_PIXEL_HEIGHT = 2000
+DEFAULT_PIXEL_AREA = DEFAULT_PIXEL_WIDTH * DEFAULT_PIXEL_HEIGHT
+DEFAULT_PIXEL = (DEFAULT_PIXEL_WIDTH, DEFAULT_PIXEL_HEIGHT)
+
 
 class PathologyVisualizer(param.Parameterized):
 
@@ -26,9 +31,18 @@ class PathologyVisualizer(param.Parameterized):
         self.pathology_img_source = pathology_img
         initial_scale = .01  # default_factor(self.pathology_img_source.shape)
 
-        self.scale_wig = pnw.FloatSlider(name='scale factor', step=.01, value=initial_scale,
-                                         start=PathologyVisualizer.SCALE_MIN,
-                                         end=PathologyVisualizer.SCALE_MAX)
+        values = [10**(x/10) for x in range(-20, 20, 1)]
+
+        area = max(DEFAULT_PIXEL) / max(pathology_img.shape)
+
+        position = min(zip(range(len(values)), values),
+                       key=lambda x: abs(x[1] - area))
+
+        default = values[position[0]]
+
+        self.scale_wig = pnw.DiscreteSlider(
+            name='scale factor', options=values, value=default)
+
         self.aspect_wig = pn.widgets.StaticText(
             name='aspect ratio at 0 degrees (height x width)', value=(0, 0))
         self.angle_wig = pnw.IntSlider(name='angle', step=1, value=0,

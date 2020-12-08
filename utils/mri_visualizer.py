@@ -8,6 +8,11 @@ import cv2
 import pydicom
 from .primitives import Image
 
+DEFAULT_PIXEL_WIDTH = 2000
+DEFAULT_PIXEL_HEIGHT = 2000
+DEFAULT_PIXEL_AREA = DEFAULT_PIXEL_WIDTH * DEFAULT_PIXEL_HEIGHT
+DEFAULT_PIXEL = (DEFAULT_PIXEL_WIDTH, DEFAULT_PIXEL_HEIGHT)
+
 
 class MriVisualizer(param.Parameterized):
 
@@ -22,18 +27,27 @@ class MriVisualizer(param.Parameterized):
         # slice location better for sorting
         self.dcms = sorted([dcm for dcm in p.iterdir()])
 
-        initial_scale = 1
-
-        self.scale_wig = pnw.FloatSlider(name='scale factor',
-                                         step=.1,
-                                         value=initial_scale,
-                                         start=MriVisualizer.SCALE_MIN,
-                                         end=MriVisualizer.SCALE_MAX)
         self.index_wig = pnw.IntSlider(
             name='slice', value=1, start=1, end=len(self.dcms))
         self.interpolation = pnw.Select(name='interpolation', options=[
                                         'INTER_AREA', 'INTER_CUBIC', 'INTER_LINEAR'], value='INTER_CUBIC')
-        w, h = 0, 0
+
+        path = self.dcms[self.index_wig.value]
+        dataset = pydicom.dcmread(path)
+        img = dataset.pixel_array
+        w, h = img.shape
+
+        values = [10**(x/10) for x in range(-20, 20, 1)]
+
+        area = max(DEFAULT_PIXEL) / max(img.shape)
+
+        position = min(zip(range(len(values)), values),
+                       key=lambda x: abs(x[1] - area))
+
+        default = values[position[0]]
+
+        self.scale_wig = pnw.DiscreteSlider(
+            name='scale factor', options=values, value=default)
 
         self.aspect_wig = pn.widgets.StaticText(
             name='aspect ratio', value=(w, h))
