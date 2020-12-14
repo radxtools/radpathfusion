@@ -1,0 +1,9 @@
+pydicom
+opencv-contrib-python
+jupyter
+holoviews
+panel
+nibabel
+numpy
+pandas
+param
