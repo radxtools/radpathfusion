@@ -8,7 +8,14 @@ If you make use of this implementation, please cite the following paper:
 
 TBD
 
-...
+## Prerequisites
+
+The below software and configurations will be needed to execute the notebooks:
+
+* Docker
+    * Update docker with 8 gigs of memory
+* git
+
 
 # Getting started with Rad Path Fusion
 
@@ -20,7 +27,16 @@ First clone this repository
 git clone https://github.com/Theta-Tech-AI/radpathfusion.git
 ```
 
-There are multiple ways to get started.
+Second, we will quickly configure the docker memory
+
+## Docker Setup:
+1. Open Docker Destop
+2. Open settings
+2. Click on resources as seen on the below screen shot
+4. Move the memory limit to 8 GB
+![Docker Configuration](assets/docker_config.png)
+
+Lastly, we will run the docker image using either:
 
 1. docker-compose
 2. docker run
@@ -42,7 +58,7 @@ Run the following commands to start the docker container
 ```
 docker rm radxtools/radpathfusion-examples
 docker pull radxtools/radpathfusion-examples
-docker run -d -p 3000:3000 --name topology-radiomics-examples radxtools/radpathfusion-examples
+docker run -d -p 3000:3000 --name radpathfusion-examples radxtools/radpathfusion-examples
 ```
 
 ## Tutorials
