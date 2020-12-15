@@ -1,0 +1,11 @@
+version: '3'
+services:
+  app:
+    container_name: radpathfusion
+    image: radxtools/radpathfusion-examples:latest
+    ports:
+        - "3000:3000"
+    deploy:
+        resources:
+            limits:
+                memory: 8G
