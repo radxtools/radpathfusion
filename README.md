@@ -67,6 +67,8 @@ Once the docker image is up and running. You can view our notebooks. You can get
 
 The notebooks can be viewed by opening the browser and visting the url http://localhost:3000
 
+A walk through of the notebook with screen shots can be found [here](/docs/notebook_starter.md)
+
 
 # Contribution Guide:
 

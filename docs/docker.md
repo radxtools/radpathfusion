@@ -37,8 +37,8 @@ The docker repo can be found [here](https://hub.docker.com/repository/docker/rad
 docker login
 >>username
 >>password
-docker tag notebook radxtools/topology-radiomics-examples
-docker push radxtools/topology-radiomics-examples:latest
+docker tag notebook radxtools/radpathfusion-examples
+docker push radxtools/radpathfusion-examples:latest
 ```
 
 # Debugging the docker build
