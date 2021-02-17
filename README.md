@@ -1,6 +1,6 @@
 # Overview
 
-TBD
+This notebook provides an interactive workflow to load in a radiographic imaging volume (MRI, CT, etc.) with a corresponding digitized pathology image, and go through co-registration to map one onto the other. Functionalities include selecting corresponding sections, basic image manipulation and scaling as pre-processing steps, as well as selecting corresponding landmarks to run a deformable co-registration between the modalities. The deformation can then be applied to any annotation to map it from one to the other (e.g. map cancer annotation from pathology image onto MR image) within the noteboo. Results are visualized and fully editable and updatable within the notebook workflow.
 
 # References
 If you make use of this implementation, please cite the following paper:
