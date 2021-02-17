@@ -5,8 +5,8 @@ TBD
 # References
 If you make use of this implementation, please cite the following paper:
 
-Coregistration of Preoperative MRI with Ex Vivo Mesorectal Pathology Specimens to Spatially Map Post-treatment Changes in Rectal Cancer Onto In Vivo Imaging: Preliminary Findings
-Jacob Antunes 1, Satish Viswanath 2, Justin T Brady 3, Benjamin Crawshaw 3, Pablo Ros 4, Scott Steele 5, Conor P Delaney 5, Raj Paspulati 4, Joseph Willis 6, Anant Madabhushi 2
+Antunes, JT, Viswanath, SE, Brady, JT, Crawshaw, B, Ros, P, Steele, S, Delaney, CP, Paspulati, RM, Willis, JE, Madabhushi, A, "Coregistration of Preoperative MRI with Ex Vivo Mesorectal Pathology Specimens to Spatially Map Post-treatment Changes in Rectal Cancer Onto In Vivo Imaging: Preliminary Findings", Acad Radiol, 2018 Jul;25(7):833-841.  
+
 
 ## Prerequisites
 
