@@ -54,7 +54,7 @@ class TpsAlgorithm:
         fixed = self.fixed_img()
         moving = self.moving_img()
 
-        affined_image = cv2.warpAffine(moving, t, fixed.shape)
+        affined_image = cv2.warpAffine(moving, t, (fixed.shape[1], fixed.shape[0]))
 
         new_moving_landmarks = cv2.transform(moving_landmarks, t)
 
